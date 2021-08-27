@@ -3,7 +3,6 @@ package storage
 import (
 	"context"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 
@@ -49,16 +48,7 @@ func reset() {
 	// initialize the observer with a NULL provider that prevents NPEs in case someone forgets to initialize the platform with a real provider
 	storageConfig := provider.WithProvider("storage.default.storage", TypeStorage, NewDefaultProvider)
 
-	o, err := provider.New()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = o.RegisterProviders(false, storageConfig)
-	if err != nil {
-		log.Fatal(err)
-	}
-	p = o
+	NewConfig(storageConfig)
 }
 
 // a default provider that does nothing but prevents NPEs in case someone forgets to actually initializa the 'real' provider

@@ -38,6 +38,16 @@ var (
 	p *provider.Provider
 )
 
+func NewConfig(opts ...provider.ProviderConfig) (*provider.Provider, error) {
+	o, err := provider.New(opts...)
+	if err != nil {
+		return nil, err
+	}
+	p = o
+
+	return o, nil
+}
+
 func Log(msg string, keyValuePairs ...string) {
 	imp, found := p.Find(TypeLogger)
 	if !found {

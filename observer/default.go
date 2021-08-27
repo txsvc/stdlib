@@ -2,7 +2,6 @@ package observer
 
 import (
 	"context"
-	"log"
 
 	"github.com/txsvc/stdlib/pkg/provider"
 )
@@ -40,16 +39,7 @@ func reset() {
 	errorReportingConfig := provider.WithProvider("observer.default.errorreporting", TypeErrorReporter, NewDefaultProvider)
 	metricsConfig := provider.WithProvider("observer.default.metrics", TypeMetrics, NewDefaultProvider)
 
-	o, err := provider.New()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = o.RegisterProviders(false, loggingConfig, errorReportingConfig, metricsConfig)
-	if err != nil {
-		log.Fatal(err)
-	}
-	p = o
+	NewConfig(loggingConfig, errorReportingConfig, metricsConfig)
 }
 
 // a default provider that does nothing but prevents NPEs in case someone forgets to actually initializa the 'real' provider

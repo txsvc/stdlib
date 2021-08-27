@@ -31,6 +31,16 @@ var (
 	p *provider.Provider
 )
 
+func NewConfig(opts ...provider.ProviderConfig) (*provider.Provider, error) {
+	o, err := provider.New(opts...)
+	if err != nil {
+		return nil, err
+	}
+	p = o
+
+	return o, nil
+}
+
 func Bucket(name string) BucketHandle {
 	imp, found := p.Find(TypeStorage)
 	if !found {
