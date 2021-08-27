@@ -29,7 +29,6 @@ var (
 )
 
 func init() {
-	theDefaultProvider = &defaultObserverImpl{}
 	reset()
 }
 
@@ -44,6 +43,9 @@ func reset() {
 
 // a default provider that does nothing but prevents NPEs in case someone forgets to actually initializa the 'real' provider
 func NewDefaultProvider() interface{} {
+	if theDefaultProvider == nil {
+		theDefaultProvider = &defaultObserverImpl{}
+	}
 	return theDefaultProvider
 }
 

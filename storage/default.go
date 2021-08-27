@@ -40,7 +40,6 @@ var (
 )
 
 func init() {
-	theDefaultProvider = &defaultStorageImpl{}
 	reset()
 }
 
@@ -53,6 +52,9 @@ func reset() {
 
 // a default provider that does nothing but prevents NPEs in case someone forgets to actually initializa the 'real' provider
 func NewDefaultProvider() interface{} {
+	if theDefaultProvider == nil {
+		theDefaultProvider = &defaultStorageImpl{}
+	}
 	return theDefaultProvider
 }
 
