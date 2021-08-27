@@ -10,6 +10,7 @@ test:
 	cd pkg/timestamp && go test
 	cd pkg/validate && go test
 	cd observer && go test
+	cd storage && go test
 	
 .PHONY: test_coverage
 test_coverage:

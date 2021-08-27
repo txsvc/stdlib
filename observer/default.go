@@ -8,8 +8,8 @@ import (
 )
 
 type (
-	// defaultProviderImpl provides a simple implementation in the absence of any configuration
-	defaultProviderImpl struct {
+	// defaultObserverImpl provides a simple implementation in the absence of any configuration
+	defaultObserverImpl struct {
 	}
 )
 
@@ -19,67 +19,64 @@ var (
 	// This enforces a compile-time check of the provider implmentation,
 	// making sure all the methods defined in the interfaces are implemented.
 
-	_ provider.GenericProvider = (*defaultProviderImpl)(nil)
+	_ provider.GenericProvider = (*defaultObserverImpl)(nil)
 
-	_ ErrorReportingProvider = (*defaultProviderImpl)(nil)
-	_ LoggingProvider        = (*defaultProviderImpl)(nil)
-	_ MetricsProvider        = (*defaultProviderImpl)(nil)
+	_ ErrorReportingProvider = (*defaultObserverImpl)(nil)
+	_ LoggingProvider        = (*defaultObserverImpl)(nil)
+	_ MetricsProvider        = (*defaultObserverImpl)(nil)
 
 	// the instance, a singleton
-	theDefaultProvider *defaultProviderImpl
+	theDefaultProvider *defaultObserverImpl
 )
 
 func init() {
-	theDefaultProvider = &defaultProviderImpl{}
+	theDefaultProvider = &defaultObserverImpl{}
 	reset()
 }
 
 func reset() {
 	// initialize the observer with a NULL provider that prevents NPEs in case someone forgets to initialize the platform with a real provider
-	loggingConfig := provider.WithProvider("observer.null.logger", TypeLogger, NewDefaultProvider)
-	errorReportingConfig := provider.WithProvider("observer.null.errorreporting", TypeErrorReporter, NewDefaultProvider)
-	metricsConfig := provider.WithProvider("observer.null.metrics", TypeMetrics, NewDefaultProvider)
+	loggingConfig := provider.WithProvider("observer.default.logger", TypeLogger, NewDefaultProvider)
+	errorReportingConfig := provider.WithProvider("observer.default.errorreporting", TypeErrorReporter, NewDefaultProvider)
+	metricsConfig := provider.WithProvider("observer.default.metrics", TypeMetrics, NewDefaultProvider)
 
-	p, err := provider.New()
+	o, err := provider.New()
 	if err != nil {
 		log.Fatal(err)
 	}
-	o := &Observer{
-		Provider: p,
-	}
 
-	err = o.Provider.RegisterProviders(false, loggingConfig, errorReportingConfig, metricsConfig)
+	err = o.RegisterProviders(false, loggingConfig, errorReportingConfig, metricsConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
-	observer = o
+	p = o
 }
 
-// a NULL provider that does nothing but prevents NPEs in case someone forgets to actually initializa the 'real' provider
+// a default provider that does nothing but prevents NPEs in case someone forgets to actually initializa the 'real' provider
 func NewDefaultProvider() interface{} {
 	return theDefaultProvider
 }
 
 // IF GenericProvider
 
-func (np *defaultProviderImpl) Close() error {
+func (np *defaultObserverImpl) Close() error {
 	return nil
 }
 
 // IF ErrorReportingProvider
 
-func (np *defaultProviderImpl) ReportError(e error) {
+func (np *defaultObserverImpl) ReportError(e error) {
 }
 
 // IF LoggingProvider
 
-func (np *defaultProviderImpl) Log(msg string, keyValuePairs ...string) {
+func (np *defaultObserverImpl) Log(msg string, keyValuePairs ...string) {
 }
 
-func (np *defaultProviderImpl) LogWithLevel(lvl Severity, msg string, keyValuePairs ...string) {
+func (np *defaultObserverImpl) LogWithLevel(lvl Severity, msg string, keyValuePairs ...string) {
 }
 
 // IF MetricsProvider
 
-func (np *defaultProviderImpl) Meter(ctx context.Context, metric string, args ...string) {
+func (np *defaultObserverImpl) Meter(ctx context.Context, metric string, args ...string) {
 }

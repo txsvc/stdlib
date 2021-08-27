@@ -12,9 +12,9 @@ const (
 	LevelError
 	LevelDebug
 
-	TypeLogger provider.ProviderType = iota
-	TypeErrorReporter
-	TypeMetrics
+	TypeLogger        provider.ProviderType = 10
+	TypeErrorReporter provider.ProviderType = 11
+	TypeMetrics       provider.ProviderType = 12
 )
 
 type (
@@ -32,62 +32,40 @@ type (
 		Log(string, ...string)
 		LogWithLevel(Severity, string, ...string)
 	}
-
-	Observer struct {
-		Provider *provider.Provider
-	}
 )
 
 var (
-	observer *Observer
+	p *provider.Provider
 )
 
-func (obs *Observer) Log(msg string, keyValuePairs ...string) {
-	imp, found := obs.Provider.Find(TypeLogger)
+func Log(msg string, keyValuePairs ...string) {
+	imp, found := p.Find(TypeLogger)
 	if !found {
 		return
 	}
 	imp.(LoggingProvider).Log(msg, keyValuePairs...)
 }
 
-func (obs *Observer) LogWithLevel(lvl Severity, msg string, keyValuePairs ...string) {
-	imp, found := obs.Provider.Find(TypeLogger)
+func LogWithLevel(lvl Severity, msg string, keyValuePairs ...string) {
+	imp, found := p.Find(TypeLogger)
 	if !found {
 		return
 	}
 	imp.(LoggingProvider).LogWithLevel(lvl, msg, keyValuePairs...)
 }
 
-func (obs *Observer) Meter(ctx context.Context, metric string, args ...string) {
-	imp, found := obs.Provider.Find(TypeMetrics)
+func Meter(ctx context.Context, metric string, args ...string) {
+	imp, found := p.Find(TypeMetrics)
 	if !found {
 		return
 	}
 	imp.(MetricsProvider).Meter(ctx, metric, args...)
 }
 
-func (obs *Observer) ReportError(e error) {
-	imp, found := obs.Provider.Find(TypeErrorReporter)
+func ReportError(e error) {
+	imp, found := p.Find(TypeErrorReporter)
 	if !found {
 		return
 	}
 	imp.(ErrorReportingProvider).ReportError(e)
-}
-
-func Log(msg string, keyValuePairs ...string) {
-	observer.Log(msg, keyValuePairs...)
-}
-
-func LogWithLevel(lvl Severity, msg string, keyValuePairs ...string) {
-	observer.LogWithLevel(lvl, msg, keyValuePairs...)
-}
-
-// Meter logs args to a metrics log from where the values can be aggregated and analyzed.
-func Meter(ctx context.Context, metric string, args ...string) {
-	observer.Meter(ctx, metric, args...)
-}
-
-// ReportError reports error e using the current platform's error reporting provider
-func ReportError(e error) {
-	observer.ReportError(e)
 }
