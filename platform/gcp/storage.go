@@ -11,6 +11,13 @@ import (
 	"github.com/txsvc/stdlib/storage"
 )
 
+//
+// Configure the Google Cloud Storage provider like this:
+//
+//	storageConfig := provider.WithProvider("google.cloud.storage", storage.TypeStorage, NewGoogleCloudStorageProvider)
+// 	storage.NewConfig(storageConfig)
+//
+
 type (
 	// googleCloudStorageImpl provides a simple implementation in the absence of any configuration
 	googleCloudStorageImpl struct {
