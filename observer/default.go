@@ -68,8 +68,9 @@ func (np *defaultObserverImpl) Close() error {
 
 // IF ErrorReportingProvider
 
-func (np *defaultObserverImpl) ReportError(e error) {
+func (np *defaultObserverImpl) ReportError(e error) error {
 	log.Error().Stack().Err(e).Msg("")
+	return e
 }
 
 // IF LoggingProvider

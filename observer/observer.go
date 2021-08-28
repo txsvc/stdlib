@@ -25,7 +25,7 @@ type (
 	Severity int
 
 	ErrorReportingProvider interface {
-		ReportError(error)
+		ReportError(error) error
 	}
 
 	MetricsProvider interface {
@@ -95,10 +95,10 @@ func Meter(ctx context.Context, metric string, vals ...string) {
 	imp.(MetricsProvider).Meter(ctx, metric, vals...)
 }
 
-func ReportError(e error) {
+func ReportError(e error) error {
 	imp, found := p.Find(TypeErrorReporter)
 	if !found {
-		return
+		return nil
 	}
-	imp.(ErrorReportingProvider).ReportError(e)
+	return imp.(ErrorReportingProvider).ReportError(e)
 }

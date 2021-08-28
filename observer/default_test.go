@@ -54,7 +54,11 @@ func TestReportError(t *testing.T) {
 
 	// simple exception
 	e := fmt.Errorf("an error happened")
-	ReportError(e)
+	ee := ReportError(e)
+
+	assert.NotNil(t, ee)
+	assert.Equal(t, e.Error(), ee.Error())
+
 	// with stacktrace
 	ReportError(outer())
 }
