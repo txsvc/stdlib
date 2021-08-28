@@ -23,9 +23,9 @@ type (
 		providers map[ProviderType]ProviderConfig
 	}
 
-	// FIXME implement this
 	GenericProvider interface {
 		Close() error
+		//RegisterProviders(bool, ...ProviderConfig) error
 	}
 )
 
