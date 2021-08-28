@@ -7,6 +7,9 @@ import (
 )
 
 const (
+	DefaultLogId = "default"
+	MetricsLogId = "metrics"
+
 	LevelInfo Severity = iota
 	LevelWarn
 	LevelError
@@ -31,6 +34,9 @@ type (
 	LoggingProvider interface {
 		Log(string, ...string)
 		LogWithLevel(Severity, string, ...string)
+
+		EnableLogging()
+		DisableLogging()
 	}
 )
 
@@ -62,6 +68,22 @@ func LogWithLevel(lvl Severity, msg string, keyValuePairs ...string) {
 		return
 	}
 	imp.(LoggingProvider).LogWithLevel(lvl, msg, keyValuePairs...)
+}
+
+func EnableLogging() {
+	imp, found := p.Find(TypeLogger)
+	if !found {
+		return
+	}
+	imp.(LoggingProvider).EnableLogging()
+}
+
+func DisableLogging() {
+	imp, found := p.Find(TypeLogger)
+	if !found {
+		return
+	}
+	imp.(LoggingProvider).DisableLogging()
 }
 
 func Meter(ctx context.Context, metric string, args ...string) {

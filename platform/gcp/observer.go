@@ -12,11 +12,6 @@ import (
 	"github.com/txsvc/stdlib/pkg/provider"
 )
 
-const (
-	defaultLogId = "default"
-	metricsLogId = "metrics"
-)
-
 type (
 	// stackdriverImpl provides a simple implementation in the absence of any configuration
 	stackdriverImpl struct {
@@ -25,6 +20,8 @@ type (
 
 		loggingClient *stackdriver_logging.Client
 		errorClient   *stackdriver_error.Client
+
+		loggingDisabled bool
 	}
 )
 
@@ -68,10 +65,11 @@ func NewDefaultProvider() interface{} {
 		}
 
 		theStackdriverProvider = &stackdriverImpl{
-			metrics:       lc.Logger(metricsLogId),
-			logger:        lc.Logger(defaultLogId),
-			loggingClient: lc,
-			errorClient:   ec,
+			metrics:         lc.Logger(observer.MetricsLogId),
+			logger:          lc.Logger(observer.DefaultLogId),
+			loggingClient:   lc,
+			errorClient:     ec,
+			loggingDisabled: false,
 		}
 	}
 	return theStackdriverProvider
@@ -94,11 +92,25 @@ func (np *stackdriverImpl) ReportError(e error) {
 // IF LoggingProvider
 
 func (np *stackdriverImpl) Log(msg string, keyValuePairs ...string) {
+	if np.loggingDisabled {
+		return // just do nothing
+	}
 	LogWithLevel(np.logger, observer.LevelInfo, msg, keyValuePairs...)
 }
 
 func (np *stackdriverImpl) LogWithLevel(lvl observer.Severity, msg string, keyValuePairs ...string) {
+	if np.loggingDisabled {
+		return // just do nothing
+	}
 	LogWithLevel(np.logger, lvl, msg, keyValuePairs...)
+}
+
+func (np *stackdriverImpl) EnableLogging() {
+	np.loggingDisabled = false
+}
+
+func (np *stackdriverImpl) DisableLogging() {
+	np.loggingDisabled = true
 }
 
 // IF MetricsProvider
@@ -110,7 +122,7 @@ func (np *stackdriverImpl) Meter(ctx context.Context, metric string, args ...str
 func LogWithLevel(logger *stackdriver_logging.Logger, lvl observer.Severity, msg string, keyValuePairs ...string) {
 	e := stackdriver_logging.Entry{
 		Payload:  msg,
-		Severity: toSeverity(lvl),
+		Severity: toStackdriverSeverity(lvl),
 	}
 
 	n := len(keyValuePairs)
@@ -134,7 +146,7 @@ func LogWithLevel(logger *stackdriver_logging.Logger, lvl observer.Severity, msg
 	logger.Log(e)
 }
 
-func toSeverity(severity observer.Severity) stackdriver_logging.Severity {
+func toStackdriverSeverity(severity observer.Severity) stackdriver_logging.Severity {
 	switch severity {
 	case observer.LevelInfo:
 		return stackdriver_logging.Info

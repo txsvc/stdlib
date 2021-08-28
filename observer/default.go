@@ -3,12 +3,17 @@ package observer
 import (
 	"context"
 
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"github.com/rs/zerolog/pkgerrors"
+
 	"github.com/txsvc/stdlib/pkg/provider"
 )
 
 type (
 	// defaultObserverImpl provides a simple implementation in the absence of any configuration
 	defaultObserverImpl struct {
+		loggingDisabled bool
 	}
 )
 
@@ -44,7 +49,13 @@ func reset() {
 // a default provider that does nothing but prevents NPEs in case someone forgets to actually initializa the 'real' provider
 func NewDefaultProvider() interface{} {
 	if theDefaultProvider == nil {
-		theDefaultProvider = &defaultObserverImpl{}
+		zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
+		// log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+
+		theDefaultProvider = &defaultObserverImpl{
+			loggingDisabled: false,
+		}
+		theDefaultProvider.EnableLogging()
 	}
 	return theDefaultProvider
 }
@@ -58,14 +69,43 @@ func (np *defaultObserverImpl) Close() error {
 // IF ErrorReportingProvider
 
 func (np *defaultObserverImpl) ReportError(e error) {
+	log.Error().Stack().Err(e).Msg("")
 }
 
 // IF LoggingProvider
 
 func (np *defaultObserverImpl) Log(msg string, keyValuePairs ...string) {
+	if np.loggingDisabled {
+		return // just do nothing
+	}
+	log.Info().Msg(msg)
 }
 
 func (np *defaultObserverImpl) LogWithLevel(lvl Severity, msg string, keyValuePairs ...string) {
+	if np.loggingDisabled {
+		return // just do nothing
+	}
+
+	switch lvl {
+	case LevelInfo:
+		log.Info().Msg(msg)
+	case LevelWarn:
+		log.Warn().Msg(msg)
+	case LevelError:
+		log.Error().Msg(msg)
+	case LevelDebug:
+		log.Debug().Msg(msg)
+	}
+}
+
+func (np *defaultObserverImpl) EnableLogging() {
+	np.loggingDisabled = false
+	zerolog.SetGlobalLevel(zerolog.DebugLevel)
+}
+
+func (np *defaultObserverImpl) DisableLogging() {
+	np.loggingDisabled = true
+	zerolog.SetGlobalLevel(zerolog.Disabled)
 }
 
 // IF MetricsProvider
