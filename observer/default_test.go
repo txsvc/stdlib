@@ -1,6 +1,7 @@
 package observer
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -26,10 +27,26 @@ func TestOffAndOn(t *testing.T) {
 	assert.NotNil(t, p)
 
 	DisableLogging()
+	_, found := p.Find(TypeLogger)
+	assert.True(t, found)
+
 	Log("should NOT see this message")
 
 	EnableLogging()
 	Log("SHOULD see this message")
+}
+
+func TestWithKV(t *testing.T) {
+	assert.NotNil(t, p)
+
+	Log("message with even KVs", "aa", "AA", "bb", "BB", "cc", "CC")
+	Log("message with odd KVs", "aa", "AA", "bb")
+}
+
+func TestMetering(t *testing.T) {
+	assert.NotNil(t, p)
+
+	Meter(context.Background(), "sample", "aa", "bb")
 }
 
 func TestReportError(t *testing.T) {

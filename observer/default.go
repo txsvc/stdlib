@@ -50,7 +50,7 @@ func reset() {
 func NewDefaultProvider() interface{} {
 	if theDefaultProvider == nil {
 		zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
-		// log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+		//zerolog.SetGlobalLevel(zerolog.InfoLevel)
 
 		theDefaultProvider = &defaultObserverImpl{
 			loggingDisabled: false,
@@ -78,7 +78,7 @@ func (np *defaultObserverImpl) Log(msg string, keyValuePairs ...string) {
 	if np.loggingDisabled {
 		return // just do nothing
 	}
-	log.Info().Msg(msg)
+	np.LogWithLevel(LevelInfo, msg, keyValuePairs...)
 }
 
 func (np *defaultObserverImpl) LogWithLevel(lvl Severity, msg string, keyValuePairs ...string) {
@@ -86,9 +86,21 @@ func (np *defaultObserverImpl) LogWithLevel(lvl Severity, msg string, keyValuePa
 		return // just do nothing
 	}
 
+	var kv *zerolog.Array
+	if len(keyValuePairs) > 0 {
+		kv = zerolog.Arr()
+		for i := range keyValuePairs {
+			kv = kv.Str(keyValuePairs[i])
+		}
+	}
+
 	switch lvl {
 	case LevelInfo:
-		log.Info().Msg(msg)
+		if kv != nil {
+			log.Info().Array(ValuesLogId, kv).Msg(msg)
+		} else {
+			log.Info().Msg(msg)
+		}
 	case LevelWarn:
 		log.Warn().Msg(msg)
 	case LevelError:
@@ -100,7 +112,7 @@ func (np *defaultObserverImpl) LogWithLevel(lvl Severity, msg string, keyValuePa
 
 func (np *defaultObserverImpl) EnableLogging() {
 	np.loggingDisabled = false
-	zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	zerolog.SetGlobalLevel(zerolog.TraceLevel)
 }
 
 func (np *defaultObserverImpl) DisableLogging() {
@@ -110,5 +122,12 @@ func (np *defaultObserverImpl) DisableLogging() {
 
 // IF MetricsProvider
 
-func (np *defaultObserverImpl) Meter(ctx context.Context, metric string, args ...string) {
+func (np *defaultObserverImpl) Meter(ctx context.Context, metric string, vals ...string) {
+	kv := zerolog.Arr()
+	if len(vals) > 0 {
+		for i := range vals {
+			kv = kv.Str(vals[i])
+		}
+	}
+	log.Trace().Array(ValuesLogId, kv).Str(MetricsLogId, metric).Msg("")
 }

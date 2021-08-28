@@ -8,7 +8,8 @@ import (
 
 const (
 	DefaultLogId = "default"
-	MetricsLogId = "metrics"
+	MetricsLogId = "metric"
+	ValuesLogId  = "values"
 
 	LevelInfo Severity = iota
 	LevelWarn
@@ -28,7 +29,7 @@ type (
 	}
 
 	MetricsProvider interface {
-		Meter(ctx context.Context, metric string, args ...string)
+		Meter(ctx context.Context, metric string, vals ...string)
 	}
 
 	LoggingProvider interface {
@@ -86,12 +87,12 @@ func DisableLogging() {
 	imp.(LoggingProvider).DisableLogging()
 }
 
-func Meter(ctx context.Context, metric string, args ...string) {
+func Meter(ctx context.Context, metric string, vals ...string) {
 	imp, found := p.Find(TypeMetrics)
 	if !found {
 		return
 	}
-	imp.(MetricsProvider).Meter(ctx, metric, args...)
+	imp.(MetricsProvider).Meter(ctx, metric, vals...)
 }
 
 func ReportError(e error) {
