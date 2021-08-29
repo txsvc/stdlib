@@ -2,6 +2,7 @@ package observer
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/txsvc/stdlib/pkg/provider"
 )
@@ -46,6 +47,10 @@ var (
 )
 
 func NewConfig(opts ...provider.ProviderConfig) (*provider.Provider, error) {
+	if pc := validateProviders(opts...); pc != nil {
+		return nil, fmt.Errorf(provider.MsgUnsupportedProviderType, pc.Type)
+	}
+
 	o, err := provider.New(opts...)
 	if err != nil {
 		return nil, err
@@ -53,6 +58,23 @@ func NewConfig(opts ...provider.ProviderConfig) (*provider.Provider, error) {
 	p = o
 
 	return o, nil
+}
+
+func UpdateConfig(opts ...provider.ProviderConfig) (*provider.Provider, error) {
+	if pc := validateProviders(opts...); pc != nil {
+		return nil, fmt.Errorf(provider.MsgUnsupportedProviderType, pc.Type)
+	}
+
+	return p, p.RegisterProviders(true, opts...)
+}
+
+func validateProviders(opts ...provider.ProviderConfig) *provider.ProviderConfig {
+	for _, pc := range opts {
+		if pc.Type != TypeLogger && pc.Type != TypeErrorReporter && pc.Type != TypeMetrics {
+			return &pc // this is not one of the above i.e. not supported
+		}
+	}
+	return nil
 }
 
 func Log(msg string, keyValuePairs ...string) {

@@ -34,10 +34,13 @@ var (
 )
 
 func init() {
-	reset()
+	Init()
 }
 
-func reset() {
+func Init() {
+	// force a reset
+	theDefaultProvider = nil
+
 	// initialize the observer with a NULL provider that prevents NPEs in case someone forgets to initialize the platform with a real provider
 	loggingConfig := provider.WithProvider("observer.default.logger", TypeLogger, NewDefaultProvider)
 	errorReportingConfig := provider.WithProvider("observer.default.errorreporting", TypeErrorReporter, NewDefaultProvider)

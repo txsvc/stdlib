@@ -16,6 +16,14 @@ type (
 	}
 )
 
+var (
+	_ GenericProvider = (*TestProviderImpl)(nil)
+)
+
+func (tp *TestProviderImpl) Close() error {
+	return nil
+}
+
 func newTestProvider() interface{} {
 	return &TestProviderImpl{}
 }
@@ -52,6 +60,17 @@ func TestNewProvider(t *testing.T) {
 	pi3, found := p.Find(otherType)
 	assert.False(t, found)
 	assert.Nil(t, pi3)
+}
+
+func TestCloseProviders(t *testing.T) {
+	pc1 := WithProvider("test", testType, newTestProvider)
+	p, err := New(pc1)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, p)
+	assert.Equal(t, 1, len(p.providers))
+
+	assert.False(t, p.Close())
 }
 
 func TestDuplicateProvider(t *testing.T) {
