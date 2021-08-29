@@ -40,13 +40,15 @@ var (
 )
 
 func init() {
-	reset()
+	Init()
 }
 
-func reset() {
+func Init() {
+	// force a 'reset'
+	theDefaultProvider = nil
+
 	// initialize the observer with a NULL provider that prevents NPEs in case someone forgets to initialize the platform with a real provider
 	storageConfig := provider.WithProvider("storage.default.storage", TypeStorage, NewDefaultProvider)
-
 	NewConfig(storageConfig)
 }
 

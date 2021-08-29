@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"fmt"
 	"io"
 
 	"github.com/txsvc/stdlib/pkg/provider"
@@ -31,14 +32,26 @@ var (
 	p *provider.Provider
 )
 
-func NewConfig(opts ...provider.ProviderConfig) (*provider.Provider, error) {
-	o, err := provider.New(opts...)
+func NewConfig(opts provider.ProviderConfig) (*provider.Provider, error) {
+	if opts.Type != TypeStorage {
+		return nil, fmt.Errorf(provider.MsgUnsupportedProviderType, opts.Type)
+	}
+
+	o, err := provider.New(opts)
 	if err != nil {
 		return nil, err
 	}
 	p = o
 
 	return o, nil
+}
+
+func UpdateConfig(opts provider.ProviderConfig) (*provider.Provider, error) {
+	if opts.Type != TypeStorage {
+		return nil, fmt.Errorf(provider.MsgUnsupportedProviderType, opts.Type)
+	}
+
+	return p, p.RegisterProviders(true, opts)
 }
 
 func Bucket(name string) BucketHandle {

@@ -5,7 +5,8 @@ import (
 )
 
 const (
-	MsgMissingProvider = "provider '%s' required"
+	MsgMissingProvider         = "provider '%s' required"
+	MsgUnsupportedProviderType = "unsupported provider type '%d'"
 )
 
 type (
@@ -25,7 +26,6 @@ type (
 
 	GenericProvider interface {
 		Close() error
-		//RegisterProviders(bool, ...ProviderConfig) error
 	}
 )
 
@@ -42,6 +42,18 @@ func New(opts ...ProviderConfig) (*Provider, error) {
 	return &p, nil
 }
 
+// Close iterates over all registered ProviderConfigs and asks them to 'close'
+func (p *Provider) Close() bool {
+	hasError := false
+	for _, pc := range p.providers {
+		err := pc.Impl().(GenericProvider).Close()
+		if err != nil {
+			hasError = true
+		}
+	}
+	return hasError
+}
+
 // RegisterProviders registers one or more providers. An existing provider will be overwritten
 // if ignoreExists is true, otherwise the function returns an error.
 func (p *Provider) RegisterProviders(ignoreExists bool, opts ...ProviderConfig) error {
@@ -56,7 +68,7 @@ func (p *Provider) RegisterProviders(ignoreExists bool, opts ...ProviderConfig) 
 	return nil
 }
 
-// Find returns the registered provider instance if it is defined.
+// Find returns the registered provider instance if defined.
 // The bool flag is set to true if there is a provider and false otherwise.
 func (p *Provider) Find(providerType ProviderType) (interface{}, bool) {
 	pc, ok := p.providers[providerType]
