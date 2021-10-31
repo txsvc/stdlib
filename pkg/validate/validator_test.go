@@ -1,21 +1,21 @@
 package validate
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNewValidator(t *testing.T) {
-	v := New("test")
+	v := NewValidator()
 	assert.NotNil(t, v)
-	assert.Equal(t, "test", v.Name)
 	assert.Equal(t, 0, v.Errors)
 	assert.Equal(t, 0, v.Warnings)
 }
 
 func TestStringEquals(t *testing.T) {
-	v := New("test")
+	v := NewValidator()
 
 	v.StringEquals("a", "a")
 	assert.Equal(t, 0, v.Errors)
@@ -27,7 +27,7 @@ func TestStringEquals(t *testing.T) {
 }
 
 func TestStringNotEmpty(t *testing.T) {
-	v := New("test")
+	v := NewValidator()
 
 	v.StringNotEmpty("a", "hint")
 	assert.Equal(t, 0, v.Errors)
@@ -39,23 +39,23 @@ func TestStringNotEmpty(t *testing.T) {
 }
 
 func TestNotNil(t *testing.T) {
-	v1 := New("test")
+	v1 := NewValidator()
 	v1.NotNil("a", "hint")
 	assert.Equal(t, 0, v1.Errors)
 	assert.Equal(t, 0, v1.Warnings)
 
-	v2 := New("test")
+	v2 := NewValidator()
 	v2.NotNil("", "hint")
 	assert.Equal(t, 0, v2.Errors)
 	assert.Equal(t, 0, v2.Warnings)
 
 	var s1 *Assertion
-	v3 := New("test")
+	v3 := NewValidator()
 	v3.NotNil(s1, "hint")
 	assert.Equal(t, 1, v3.Errors)
 	assert.Equal(t, 0, v3.Warnings)
 
-	v4 := New("test")
+	v4 := NewValidator()
 	s2 := new(Assertion)
 	v4.NotNil(s2, "hint")
 	assert.Equal(t, 0, v4.Errors)
@@ -63,7 +63,7 @@ func TestNotNil(t *testing.T) {
 }
 
 func TestNonZero(t *testing.T) {
-	v := New("test")
+	v := NewValidator()
 
 	v.NonZero(42, "hint")
 	assert.Equal(t, 0, v.Errors)
@@ -74,7 +74,7 @@ func TestNonZero(t *testing.T) {
 }
 
 func TestISO639(t *testing.T) {
-	v := New("test")
+	v := NewValidator()
 
 	v.ISO639("en_US")
 	assert.Equal(t, 0, v.Errors)
@@ -85,7 +85,7 @@ func TestISO639(t *testing.T) {
 }
 
 func TestRFC1123Z(t *testing.T) {
-	v := New("test")
+	v := NewValidator()
 
 	v.RFC1123Z("Fri, 04 Jun 2021 06:57:26 +0000")
 	assert.Equal(t, 0, v.Errors)
@@ -101,7 +101,7 @@ func TestRFC1123Z(t *testing.T) {
 }
 
 func TestTimestamp(t *testing.T) {
-	v := New("test")
+	v := NewValidator()
 
 	v.Timestamp("1")
 	assert.Equal(t, 0, v.Errors)
@@ -120,12 +120,12 @@ func TestMapNotEmpty(t *testing.T) {
 
 	m := make(map[string]string)
 
-	v1 := New("test")
+	v1 := NewValidator()
 	v1.MapNotEmpty(m, "hint")
 	assert.Equal(t, 1, v1.Errors)
 	assert.Equal(t, 0, v1.Warnings)
 
-	v2 := New("test")
+	v2 := NewValidator()
 	m["foo"] = "bar"
 	v2.MapNotEmpty(m, "hint")
 	assert.Equal(t, 0, v2.Errors)
@@ -133,7 +133,7 @@ func TestMapNotEmpty(t *testing.T) {
 }
 
 func TestMapContains(t *testing.T) {
-	v := New("test")
+	v := NewValidator()
 	m := make(map[string]string)
 	m["foo"] = "bar"
 
@@ -144,4 +144,36 @@ func TestMapContains(t *testing.T) {
 	v.MapContains(m, "bar", "hint")
 	assert.Equal(t, 1, v.Errors)
 	assert.Equal(t, 0, v.Warnings)
+}
+
+func TestReport(t *testing.T) {
+	m := make(map[string]string)
+
+	v1 := NewValidator()
+	v1.MapNotEmpty(m, "hint 1")
+	v1.AddWarning("warning 1")
+
+	fmt.Println(v1.AsError())
+}
+
+func TestSaveAndResoreContext(t *testing.T) {
+	v1 := NewValidator()
+	assert.Equal(t, 0, len(v1.ctxStack))
+	assert.Equal(t, "root", v1.Context())
+
+	v1.SaveContext("ctx1")
+	assert.Equal(t, 1, len(v1.ctxStack))
+	assert.Equal(t, "ctx1", v1.Context())
+
+	v1.SaveContext("ctx2")
+	assert.Equal(t, 2, len(v1.ctxStack))
+	assert.Equal(t, "ctx2", v1.Context())
+
+	v1.RestoreContext()
+	assert.Equal(t, 1, len(v1.ctxStack))
+	assert.Equal(t, "ctx1", v1.Context())
+
+	v1.RestoreContext()
+	assert.Equal(t, 0, len(v1.ctxStack))
+	assert.Equal(t, "root", v1.Context())
 }

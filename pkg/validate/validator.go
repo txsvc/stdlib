@@ -24,7 +24,7 @@ const (
 	MsgInvalidTimestamp    = "invalid timestamp '%d'"
 	MsgNonEmptyMap         = "expected none empty map '%s'"
 	MsgExpectedKey         = "expected key '%s' in map '%s'"
-	MsgEmptyReport         = "validation '%s' has zero errors/warnings"
+	MsgEmptyReport         = "no errors/warnings"
 )
 
 type (
@@ -33,46 +33,41 @@ type (
 		Type int    // 0 == warning, 1 == error
 		Txt  string // description of the problem
 		Err  error
+		ctx  string // context describes where the error or warning happened
+
 	}
 
 	// Validator collects assertions
 	Validator struct {
-		Name     string
 		Issues   []*Assertion
 		Errors   int
 		Warnings int
-	}
-
-	// Validatable is the interface that maust be implemented to support recursive validations of structs
-	Validatable interface {
-		Validate(*Validator) *Validator
+		ctxStack []string
 	}
 )
 
-// New initializes and returns a new Validator
-func New(name string) *Validator {
+// NewValidator initializes and returns a new Validator
+func NewValidator() *Validator {
 	v := Validator{
-		Name:   name,
-		Issues: make([]*Assertion, 0),
+		Issues:   make([]*Assertion, 0),
+		Errors:   0,
+		Warnings: 0,
 	}
-	return &v
-}
+	v.ctxStack = make([]string, 0)
 
-// Validate starts the chain of validations
-func (v *Validator) Validate(src Validatable) *Validator {
-	return src.Validate(v)
+	return &v
 }
 
 // AddError adds an error assertion
 func (v *Validator) AddError(txt string) {
-	v.Issues = append(v.Issues, &Assertion{Type: AssertionError, Txt: txt})
+	v.Issues = append(v.Issues, &Assertion{Type: AssertionError, Txt: txt, ctx: v.Context()})
 	v.Errors++
 }
 
 // AddWarning adds an warning assertion
 func (v *Validator) AddWarning(txt string) {
-	v.Issues = append(v.Issues, &Assertion{Type: AssertionWarning, Txt: txt})
-	v.Errors++
+	v.Issues = append(v.Issues, &Assertion{Type: AssertionWarning, Txt: txt, ctx: v.Context()})
+	v.Warnings++
 }
 
 // StringEquals verifies a string
@@ -191,12 +186,27 @@ func (v *Validator) Error() string {
 
 // Report returns a description of all issues
 func (v *Validator) Report() string {
-	if v.Errors == 0 {
-		return fmt.Sprintf(MsgEmptyReport, v.Name)
+	if v.Errors == 0 && v.Warnings == 0 {
+		return MsgEmptyReport
 	}
 	r := "\n"
 	for i, issue := range v.Issues {
-		r = r + fmt.Sprintf("issue-%d: %s\n", i+1, issue.Txt)
+		r = r + issue.ToStringWithIndex(i+1)
 	}
 	return r
+}
+
+func (a *Assertion) ToString() string {
+	return fmt.Sprintf("%s(%s): %s\n", a.ctx, a.TypeAsString(), a.Txt)
+}
+
+func (a *Assertion) ToStringWithIndex(i int) string {
+	return fmt.Sprintf("%s-%02d (%s): %s\n", a.TypeAsString(), i, a.ctx, a.Txt)
+}
+
+func (a *Assertion) TypeAsString() string {
+	if a.Type == AssertionError {
+		return "error"
+	}
+	return "warning"
 }

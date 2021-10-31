@@ -1,27 +1,41 @@
 package validate
 
-// NotEmpty test all provided values not to be empty
-func NotEmpty(claims ...string) bool {
-	if len(claims) == 0 {
-		return false
+type (
+
+	// Validatable is the interface that must be implemented to support (recursive) validations of structs
+	Validatable interface {
+		Validate(string, *Validator) *Validator
 	}
-	for _, s := range claims {
-		if s == "" {
-			return false
-		}
-	}
-	return true
+)
+
+func (v *Validator) SaveContext(ctx string) {
+	v.ctxStack = append(v.ctxStack, ctx)
 }
 
-// IsMemberOf returns true if claim is part of the list of claims
-func IsMemberOf(claim string, claims ...string) bool {
-	if len(claims) == 0 {
-		return false
+func (v *Validator) RestoreContext() {
+	n := len(v.ctxStack)
+	if n > 0 {
+		v.ctxStack = v.ctxStack[:n-1]
 	}
-	for _, s := range claims {
-		if s == claim {
-			return true
-		}
-	}
-	return false
 }
+
+func (v *Validator) Context() string {
+	n := len(v.ctxStack)
+	if n == 0 {
+		return "root"
+	}
+	return v.ctxStack[n-1]
+}
+
+/*
+// Validate starts the chain of validations. Attribute root sets the context for the validations and
+// should be passed along when sub structures are validated.
+func (v *Validator) Validate(root string, src interface{}) *Validator {
+	fmt.Println("push " + root)
+
+	vv := src.(Validatable).Validate(root, v)
+
+	fmt.Println("pop")
+	return vv
+}
+*/
