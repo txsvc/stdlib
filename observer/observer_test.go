@@ -7,17 +7,17 @@ import (
 )
 
 func TestInitObserver(t *testing.T) {
-	assert.NotNil(t, p)
+	assert.NotNil(t, globalProvider)
 
-	pi, found := p.Find(TypeLogger)
+	pi, found := Instance().Find(TypeLogger)
 	assert.True(t, found)
 	assert.NotNil(t, pi)
 
-	pi, found = p.Find(TypeErrorReporter)
+	pi, found = Instance().Find(TypeErrorReporter)
 	assert.True(t, found)
 	assert.NotNil(t, pi)
 
-	pi, found = p.Find(TypeMetrics)
+	pi, found = Instance().Find(TypeMetrics)
 	assert.True(t, found)
 	assert.NotNil(t, pi)
 }

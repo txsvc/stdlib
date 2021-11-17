@@ -43,8 +43,12 @@ type (
 )
 
 var (
-	p *provider.Provider
+	globalProvider *provider.Provider // FIXME chnage name and add some explanation
 )
+
+func Instance() *provider.Provider {
+	return globalProvider
+}
 
 func NewConfig(opts ...provider.ProviderConfig) (*provider.Provider, error) {
 	if pc := validateProviders(opts...); pc != nil {
@@ -55,7 +59,7 @@ func NewConfig(opts ...provider.ProviderConfig) (*provider.Provider, error) {
 	if err != nil {
 		return nil, err
 	}
-	p = o
+	globalProvider = o
 
 	return o, nil
 }
@@ -65,7 +69,7 @@ func UpdateConfig(opts ...provider.ProviderConfig) (*provider.Provider, error) {
 		return nil, fmt.Errorf(provider.MsgUnsupportedProviderType, pc.Type)
 	}
 
-	return p, p.RegisterProviders(true, opts...)
+	return globalProvider, Instance().RegisterProviders(true, opts...)
 }
 
 func validateProviders(opts ...provider.ProviderConfig) *provider.ProviderConfig {
@@ -78,7 +82,7 @@ func validateProviders(opts ...provider.ProviderConfig) *provider.ProviderConfig
 }
 
 func Log(msg string, keyValuePairs ...string) {
-	imp, found := p.Find(TypeLogger)
+	imp, found := Instance().Find(TypeLogger)
 	if !found {
 		return
 	}
@@ -86,7 +90,7 @@ func Log(msg string, keyValuePairs ...string) {
 }
 
 func LogWithLevel(lvl Severity, msg string, keyValuePairs ...string) {
-	imp, found := p.Find(TypeLogger)
+	imp, found := Instance().Find(TypeLogger)
 	if !found {
 		return
 	}
@@ -94,7 +98,7 @@ func LogWithLevel(lvl Severity, msg string, keyValuePairs ...string) {
 }
 
 func EnableLogging() {
-	imp, found := p.Find(TypeLogger)
+	imp, found := Instance().Find(TypeLogger)
 	if !found {
 		return
 	}
@@ -102,7 +106,7 @@ func EnableLogging() {
 }
 
 func DisableLogging() {
-	imp, found := p.Find(TypeLogger)
+	imp, found := Instance().Find(TypeLogger)
 	if !found {
 		return
 	}
@@ -110,7 +114,7 @@ func DisableLogging() {
 }
 
 func Meter(ctx context.Context, metric string, vals ...string) {
-	imp, found := p.Find(TypeMetrics)
+	imp, found := Instance().Find(TypeMetrics)
 	if !found {
 		return
 	}
@@ -118,7 +122,7 @@ func Meter(ctx context.Context, metric string, vals ...string) {
 }
 
 func ReportError(e error) error {
-	imp, found := p.Find(TypeErrorReporter)
+	imp, found := Instance().Find(TypeErrorReporter)
 	if !found {
 		return nil
 	}
