@@ -17,10 +17,13 @@ func TestLog(t *testing.T) {
 
 func TestWithLogLevel(t *testing.T) {
 	assert.NotNil(t, globalProvider)
+
+	LogWithLevel(LevelDebug, "LevelDebug message")
 	LogWithLevel(LevelWarn, "LevelWarn message")
 	LogWithLevel(LevelInfo, "LevelInfo message")
+	LogWithLevel(LevelNotice, "LevelNotice message")
 	LogWithLevel(LevelError, "LevelError message")
-	LogWithLevel(LevelDebug, "LevelDebug message")
+	LogWithLevel(LevelAlert, "LevelAlert message")
 }
 
 func TestOffAndOn(t *testing.T) {

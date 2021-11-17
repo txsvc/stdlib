@@ -12,10 +12,12 @@ const (
 	MetricsLogId = "metric"
 	ValuesLogId  = "values"
 
-	LevelInfo Severity = iota
+	LevelDebug Severity = iota
+	LevelInfo
+	LevelNotice
 	LevelWarn
 	LevelError
-	LevelDebug
+	LevelAlert
 
 	TypeLogger        provider.ProviderType = 10
 	TypeErrorReporter provider.ProviderType = 11

@@ -85,7 +85,7 @@ func (np *defaultObserverImpl) Log(msg string, keyValuePairs ...string) {
 	np.LogWithLevel(LevelInfo, msg, keyValuePairs...)
 }
 
-func (np *defaultObserverImpl) LogWithLevel(lvl Severity, msg string, keyValuePairs ...string) {
+func (np *defaultObserverImpl) _LogWithLevel(lvl Severity, msg string, keyValuePairs ...string) {
 	if np.loggingDisabled {
 		return // just do nothing
 	}
@@ -99,18 +99,79 @@ func (np *defaultObserverImpl) LogWithLevel(lvl Severity, msg string, keyValuePa
 	}
 
 	switch lvl {
+	case LevelDebug:
+		if kv != nil {
+			log.Debug().Array(ValuesLogId, kv).Msg(msg)
+		} else {
+			log.Debug().Msg(msg)
+		}
 	case LevelInfo:
 		if kv != nil {
 			log.Info().Array(ValuesLogId, kv).Msg(msg)
 		} else {
 			log.Info().Msg(msg)
 		}
+	case LevelNotice:
+		if kv != nil {
+			log.Info().Array(ValuesLogId, kv).Msg(msg)
+		} else {
+			log.Info().Msg(msg)
+		}
 	case LevelWarn:
-		log.Warn().Msg(msg)
+		if kv != nil {
+			log.Warn().Array(ValuesLogId, kv).Msg(msg)
+		} else {
+			log.Warn().Msg(msg)
+		}
 	case LevelError:
-		log.Error().Msg(msg)
+		if kv != nil {
+			log.Error().Array(ValuesLogId, kv).Msg(msg)
+		} else {
+			log.Error().Msg(msg)
+		}
+	case LevelAlert:
+		if kv != nil {
+			log.Fatal().Array(ValuesLogId, kv).Msg(msg)
+		} else {
+			log.Fatal().Msg(msg)
+		}
+	}
+}
+
+func (np *defaultObserverImpl) LogWithLevel(lvl Severity, msg string, keyValuePairs ...string) {
+	if np.loggingDisabled {
+		return // just do nothing
+	}
+
+	var kv *zerolog.Array
+	if len(keyValuePairs) > 0 {
+		kv = zerolog.Arr()
+		for i := range keyValuePairs {
+			kv = kv.Str(keyValuePairs[i])
+		}
+	}
+
+	var e *zerolog.Event
+
+	switch lvl {
 	case LevelDebug:
-		log.Debug().Msg(msg)
+		e = log.Debug()
+	case LevelInfo:
+		e = log.Info()
+	case LevelNotice:
+		e = log.Trace()
+	case LevelWarn:
+		e = log.Warn()
+	case LevelError:
+		e = log.Error()
+	case LevelAlert:
+		e = log.Error()
+	}
+
+	if kv != nil {
+		e.Array(ValuesLogId, kv).Msg(msg)
+	} else {
+		e.Msg(msg)
 	}
 }
 
