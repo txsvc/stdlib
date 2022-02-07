@@ -3,11 +3,12 @@ all: test
 
 .PHONY: test
 test:
-	cd pkg/env && go test
-	cd pkg/id && go test
-	cd pkg/loader && go test
-	cd pkg/timestamp && go test
-	cd pkg/validate && go test
+	cd env && go test
+	cd id && go test
+	cd loader && go test
+	cd settings && go test
+	cd timestamp && go test
+	cd validate && go test
 	
 .PHONY: test_coverage
 test_coverage:

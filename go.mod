@@ -1,14 +1,22 @@
-	module github.com/txsvc/stdlib
+module github.com/txsvc/stdlib/v2
 
-	go 1.15
+go 1.17
 
-	require (
+require (
 	github.com/OrlovEvgeny/go-mcache v0.0.0-20200121124330-1a8195b34f3a
 	github.com/johngb/langreg v0.0.0-20150123211413-5c6abc6d19d2
-	github.com/kr/pretty v0.1.0 // indirect
-	github.com/pkg/errors v0.9.1
-	github.com/rs/zerolog v1.24.0
-	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/stretchr/testify v1.7.0
-	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
+)
+
+require (
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/kr/pretty v0.3.0 // indirect
+	github.com/kr/text v0.2.0 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/rogpeppe/go-internal v1.6.1 // indirect
+	github.com/smartystreets/goconvey v1.7.2 // indirect
+	github.com/stretchr/objx v0.1.0 // indirect
+	golang.org/x/tools v0.0.0-20190328211700-ab21143f2384 // indirect
+	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
