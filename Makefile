@@ -6,6 +6,7 @@ test:
 	cd env && go test
 	cd id && go test
 	cd loader && go test
+	cd provider && go test
 	cd settings && go test
 	cd timestamp && go test
 	cd validate && go test
