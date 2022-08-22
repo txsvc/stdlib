@@ -3,14 +3,16 @@ all: test
 
 .PHONY: test
 test:
-	cd env && go test
-	cd id && go test
-	cd loader && go test
-	cd provider && go test
-	cd settings && go test
-	cd timestamp && go test
-	cd validate && go test
+	go test
+	cd stdlibx/cmdline && go test
+	cd stdlibx/loader && go test
+	cd stdlibx/settings && go test
+	cd stdlibx/validate && go test
+	cd stdlibx/stringsx && go test
+	cd stdlibx/sysx && go test
+	# remove in the future
+	cd deprecated/provider && go test
 	
 .PHONY: test_coverage
 test_coverage:
-	go test `go list ./... | grep -v 'hack\|google'` -coverprofile=coverage.txt -covermode=atomic
+	go test `go list ./... | grep -v 'hack\|deprecated'` -coverprofile=coverage.txt -covermode=atomic
