@@ -20,7 +20,7 @@ type (
 
 	Validate3 struct {
 		attr1 string
-		attr2 *Validate1
+		attr2 *Validate2
 	}
 )
 
@@ -42,7 +42,11 @@ func (m *Validate2) Validate(root string, v *Validator) *Validator {
 	defer v.RestoreContext()
 
 	v.StringNotEmpty(m.attr1, "attr1")
-	return m.attr2.Validate(root, v)
+	v.NotNil(m.attr2, "attr2")
+	if m.attr2 != nil {
+		return m.attr2.Validate(root, v)
+	}
+	return v
 }
 
 func (m *Validate3) Validate(root string, v *Validator) *Validator {
@@ -50,7 +54,10 @@ func (m *Validate3) Validate(root string, v *Validator) *Validator {
 	defer v.RestoreContext()
 
 	v.StringNotEmpty(m.attr1, "attr1")
-	return m.attr2.Validate("Validate3.attr2", v)
+	if m.attr2 != nil {
+		return m.attr2.Validate("Validate3.attr2", v)
+	}
+	return v
 }
 
 func TestSimpleSuccess(t *testing.T) {
@@ -100,36 +107,80 @@ func TestSimpleWarning(t *testing.T) {
 
 func TestSimpleNested(t *testing.T) {
 
-	vs2 := Validate1{
+	vs1 := Validate1{
 		attr1: "some string",
 		attr2: 42,
 	}
 
-	vs1 := Validate2{
+	vs2 := Validate2{
 		attr1: "some string",
-		attr2: &vs2,
+		attr2: &vs1,
 	}
 
 	v := NewValidator()
-	v = vs1.Validate("TestSimpleNested", v)
+	v = vs2.Validate("TestSimpleNested", v)
 
 	assert.NotNil(t, v)
 	assert.Equal(t, 0, v.Errors)
 }
 
-func TestNestedWithError(t *testing.T) {
+func TestSimpleNestedNil(t *testing.T) {
 
-	vs2 := Validate1{
+	vs2 := Validate2{
+		attr1: "some string",
+		//attr2: &vs1,
+	}
+
+	v := NewValidator()
+	v = vs2.Validate("TestSimpleNestedNil", v)
+
+	assert.NotNil(t, v)
+	assert.Equal(t, 1, v.Errors)
+}
+
+func TestNestedWithNoError(t *testing.T) {
+
+	vs1 := Validate1{
 		attr1: "some string",
 		attr2: 0,
 	}
 
-	vs1 := Validate3{
+	vs2 := Validate2{
+		attr1: "some string",
+		attr2: &vs1,
+	}
+
+	vs3 := Validate3{
 		attr2: &vs2,
 	}
 
 	v := NewValidator()
-	v = vs1.Validate("TestNestedWithError", v)
+	v = vs3.Validate("TestNestedWithNoError", v)
+
+	assert.NotNil(t, v)
+	assert.Equal(t, 2, v.Errors)
+
+	fmt.Println(v.Report())
+}
+
+func TestNestedWithError(t *testing.T) {
+
+	vs1 := Validate1{
+		attr1: "some string",
+		attr2: 0,
+	}
+
+	vs2 := Validate2{
+		attr1: "some string",
+		attr2: &vs1,
+	}
+
+	vs3 := Validate3{
+		attr2: &vs2,
+	}
+
+	v := NewValidator()
+	v = vs3.Validate("TestNestedWithError", v)
 
 	assert.NotNil(t, v)
 	assert.Equal(t, 2, v.Errors)
