@@ -6,11 +6,11 @@ test:
 	go test
 	cd stdlibx/cmdline && go test
 	cd stdlibx/loader && go test
-	cd stdlibx/settings && go test
 	cd stdlibx/validate && go test
 	cd stdlibx/stringsx && go test
 	cd stdlibx/sysx && go test
 	# remove in the future
+	cd deprecated/settings && go test
 	cd deprecated/provider && go test
 	
 .PHONY: test_coverage
