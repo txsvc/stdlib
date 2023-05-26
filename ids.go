@@ -21,7 +21,7 @@ func Checksum(a string) string {
 
 // Fingerprint creates a unique ID (MD5) from a string
 func Fingerprint(a string) string {
-	hash := md5.Sum([]byte(fmt.Sprint(a)))
+	hash := md5.Sum([]byte(a))
 	return hex.EncodeToString(hash[:])
 }
 
