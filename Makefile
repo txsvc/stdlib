@@ -6,6 +6,7 @@ all: test test_coverage
 test:
 	go test
 	cd settings && go test
+	cd rest && go test
 	cd stdlibx/cmdline && go test
 	cd stdlibx/loader && go test
 	cd stdlibx/validate && go test
