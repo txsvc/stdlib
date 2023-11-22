@@ -1,20 +1,16 @@
 .PHONY: all
-all: test test_coverage
-	golangci-lint run > lint.txt
+all: test code_qa
 
 .PHONY: test
 test:
 	go test
-	cd settings && go test
-	cd rest && go test
-	cd stdlibx/cmdline && go test
-	cd stdlibx/loader && go test
-	cd stdlibx/validate && go test
-	cd stdlibx/stringsx && go test
-	cd stdlibx/sysx && go test
-	# remove in the future
-	cd deprecated/provider && go test
+	cd deprecated/cmdline && go test
+	cd deprecated/loader && go test
+	cd deprecated/validate && go test
+	cd deprecated/stringsx && go test
+	cd deprecated/sysx && go test
 	
-.PHONY: test_coverage
-test_coverage:
+.PHONY: code_qa
+code_qa:
 	go test `go list ./... | grep -v 'hack\|deprecated'` -coverprofile=coverage.txt -covermode=atomic
+	golangci-lint run > lint.txt
