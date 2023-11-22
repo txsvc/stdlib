@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"math"
 	"net/http"
 	"time"
@@ -153,7 +152,7 @@ func (c *RestClient) roundTrip(req *http.Request, response interface{}) (int, er
 
 	// anything other than OK, Created, Accepted, NoContent is treated as an error
 	if resp.StatusCode > http.StatusNoContent {
-		body, err := ioutil.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return resp.StatusCode, ErrApiInvocationError
 		}
