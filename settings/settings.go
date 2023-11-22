@@ -5,7 +5,6 @@
 package settings
 
 type (
-	State int
 
 	// DialSettings holds information needed to establish a connection with a
 	// backend API service or to simply configure a service/CLI.
