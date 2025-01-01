@@ -1,6 +1,8 @@
 package stdlib
 
 import (
+	"encoding/json"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -100,4 +102,25 @@ func TestUnmarshalFromReaderError(t *testing.T) {
 	}
 	err := UnmarshalFromReader(strings.NewReader(s), &v)
 	assert.NotNil(t, err)
+}
+
+func TestUnmarshalUseNumber(t *testing.T) {
+	const s = `{"num": 12345678901234567890}`
+	decoder := json.NewDecoder(strings.NewReader(s))
+	var v struct {
+		Num json.Number `json:"num"`
+	}
+
+	err := unmarshalUseNumber(decoder, &v)
+	assert.Nil(t, err)
+	assert.Equal(t, "12345678901234567890", v.Num.String())
+}
+
+func TestFormatError(t *testing.T) {
+	originalErr := fmt.Errorf("test error")
+	formattedErr := formatError("test input", originalErr)
+
+	assert.Error(t, formattedErr)
+	assert.Contains(t, formattedErr.Error(), "test input")
+	assert.Contains(t, formattedErr.Error(), "test error")
 }
