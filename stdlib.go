@@ -20,6 +20,9 @@ type (
 	PlaceholderType = struct{}
 )
 
+// SetLogLevel configures the global logging level based on the LOG_LEVEL environment variable.
+// Supported values are: "trace", "debug", "info", "warn", "error".
+// If the value is not recognized or not set, logging will be disabled.
 func SetLogLevel() {
 	// setup logging
 	log_level := strings.ToLower(GetString(LOG_LEVEL, ""))

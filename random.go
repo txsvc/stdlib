@@ -24,18 +24,24 @@ type lockedSource struct {
 	lock   sync.Mutex
 }
 
+// newLockedSource creates a new thread-safe random source with the given seed.
+// It wraps a rand.Source with a mutex to ensure concurrent access is safe.
 func newLockedSource(seed int64) *lockedSource {
 	return &lockedSource{
 		source: rand.NewSource(seed),
 	}
 }
 
+// Int63 returns a non-negative pseudo-random 63-bit integer as an int64
+// in a thread-safe manner.
 func (ls *lockedSource) Int63() int64 {
 	ls.lock.Lock()
 	defer ls.lock.Unlock()
 	return ls.source.Int63()
 }
 
+// Seed uses the provided seed value to initialize the generator to a deterministic state
+// in a thread-safe manner.
 func (ls *lockedSource) Seed(seed int64) {
 	ls.lock.Lock()
 	defer ls.lock.Unlock()
@@ -77,7 +83,8 @@ func RandStringN(n int) string {
 	return string(b)
 }
 
-// Seed sets the seed to seed.
+// Seed sets the seed for the default random source.
+// This affects all random string generation functions that don't use crypto/rand.
 func Seed(seed int64) {
 	src.Seed(seed)
 }

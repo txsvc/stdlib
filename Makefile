@@ -1,17 +1,27 @@
-.PHONY: all
-all: test code_qa
+# Build targets
+.PHONY: all build test lint coverage clean
 
-.PHONY: test
+# Default target
+all: build test lint coverage
+
+# Build the project
+build:
+	go build ./...
+
+# Run tests
 test:
-	go test
-	cd deprecated/cmdline && go test
-	cd deprecated/loader && go test
-	cd deprecated/validate && go test
-	cd deprecated/stringsx && go test
-	cd deprecated/sysx && go test
-	
-.PHONY: code_qa
-code_qa:
+	go test ./... -v
+
+# Run linter
+lint:
 	golangci-lint run > lint.txt
-	go test `go list ./... | grep -v 'hack\|deprecated'` -coverprofile=coverage.txt -covermode=atomic
-	
+
+# Generate test coverage
+coverage:
+	go test ./... -coverprofile=coverage.txt -covermode=atomic
+	go tool cover -func=coverage.txt
+
+# Clean build artifacts
+clean:
+	rm -f coverage.txt lint.txt
+	go clean
