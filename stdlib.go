@@ -1,7 +1,9 @@
 package stdlib
 
 import (
+	"math/rand"
 	"strings"
+	"time"
 
 	"github.com/rs/zerolog"
 )
@@ -12,6 +14,7 @@ const (
 
 // Placeholder is a placeholder object that can be used globally.
 var Placeholder PlaceholderType
+var src = rand.NewSource(time.Now().UnixNano())
 
 type (
 	// AnyType can be used to hold any type.
@@ -40,4 +43,10 @@ func SetLogLevel() {
 	default:
 		zerolog.SetGlobalLevel(zerolog.Disabled)
 	}
+}
+
+// Seed sets the seed for the default random source.
+// This affects all random string generation functions that don't use crypto/rand.
+func Seed(seed int64) {
+	src.Seed(seed)
 }
