@@ -26,8 +26,8 @@ func TestSetLogLevel(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			if tc.level != "" {
-				os.Setenv(LOG_LEVEL, tc.level)
-				defer os.Unsetenv(LOG_LEVEL)
+				_ = os.Setenv(LOG_LEVEL, tc.level)
+				defer func() { _ = os.Unsetenv(LOG_LEVEL) }()
 			}
 			SetLogLevel()
 			assert.Equal(t, tc.expected, zerolog.GlobalLevel())

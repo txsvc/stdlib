@@ -59,8 +59,8 @@ func TestGetBool(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			if tc.envValue != "" {
-				os.Setenv(tc.envKey, tc.envValue)
-				defer os.Unsetenv(tc.envKey)
+				_ = os.Setenv(tc.envKey, tc.envValue)
+				defer func() { _ = os.Unsetenv(tc.envKey) }()
 			}
 
 			result := GetBool(tc.envKey, tc.def)

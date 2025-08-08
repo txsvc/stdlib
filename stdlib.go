@@ -26,17 +26,18 @@ type (
 func SetLogLevel() {
 	// setup logging
 	log_level := strings.ToLower(GetString(LOG_LEVEL, ""))
-	if log_level == "trace" {
+	switch log_level {
+	case "trace":
 		zerolog.SetGlobalLevel(zerolog.TraceLevel)
-	} else if log_level == "debug" {
+	case "debug":
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	} else if log_level == "info" {
+	case "info":
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	} else if log_level == "warn" {
+	case "warn":
 		zerolog.SetGlobalLevel(zerolog.WarnLevel)
-	} else if log_level == "error" {
+	case "error":
 		zerolog.SetGlobalLevel(zerolog.ErrorLevel)
-	} else {
+	default:
 		zerolog.SetGlobalLevel(zerolog.Disabled)
 	}
 }
