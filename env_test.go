@@ -1,6 +1,7 @@
 package stdlib
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -33,4 +34,37 @@ func TestGetIntNotInt(t *testing.T) {
 func TestAssert(t *testing.T) {
 	assert.True(t, Exists("PATH"))
 	assert.False(t, Exists("FOO_BAR"))
+}
+
+func TestGetBool(t *testing.T) {
+	testCases := []struct {
+		name     string
+		envKey   string
+		envValue string
+		def      bool
+		expected bool
+	}{
+		{"true value", "TEST_BOOL_1", "true", false, true},
+		{"yes value", "TEST_BOOL_2", "yes", false, true},
+		{"1 value", "TEST_BOOL_3", "1", false, true},
+		{"false value", "TEST_BOOL_4", "false", true, false},
+		{"invalid value", "TEST_BOOL_5", "invalid", true, false},
+		{"empty value", "TEST_BOOL_6", "", false, false},
+		{"default true", "TEST_BOOL_NOT_SET", "", true, true},
+		{"default false", "TEST_BOOL_NOT_SET", "", false, false},
+		{"uppercase TRUE", "TEST_BOOL_7", "TRUE", false, true},
+		{"uppercase YES", "TEST_BOOL_8", "YES", false, true},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if tc.envValue != "" {
+				os.Setenv(tc.envKey, tc.envValue)
+				defer os.Unsetenv(tc.envKey)
+			}
+
+			result := GetBool(tc.envKey, tc.def)
+			assert.Equal(t, tc.expected, result)
+		})
+	}
 }
