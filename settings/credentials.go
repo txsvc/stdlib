@@ -15,6 +15,11 @@ const (
 	ClientID     = "CLIENT_ID"
 	ClientSecret = "CLIENT_SECRET"
 	AccessToken  = "ACCESS_TOKEN"
+
+	StateInit       State = iota - 2 // waiting to swap tokens
+	StateInvalid                     // a config in this state should not be used
+	StateUndefined                   // logged out
+	StateAuthorized                  // logged in
 )
 
 type (
@@ -35,6 +40,7 @@ func CredentialsFromEnv() *Credentials {
 		ProjectID: stdlib.GetString(ProjectID, ""),
 		ClientID:  stdlib.GetString(ClientID, ""),
 		Token:     stdlib.GetString(AccessToken, ""),
+		Status:    StateInit,
 	}
 	if c.Token == "" {
 		c.ClientSecret = stdlib.GetString(ClientSecret, "")
@@ -49,6 +55,7 @@ func (c *Credentials) Clone() *Credentials {
 		ClientID:     c.ClientID,
 		ClientSecret: c.ClientSecret,
 		Token:        c.Token,
+		Status:       c.Status,
 		Expires:      c.Expires,
 	}
 }
