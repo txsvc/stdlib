@@ -21,10 +21,11 @@ type (
 	State int
 
 	Credentials struct {
-		ProjectID    string `json:"project_id,omitempty"` // GCP project ID, Azure subscription ID, etc.
-		ClientID     string `json:"client_id,omitempty"`  // email for users, some UUID for API clients
+		ProjectID    string `json:"project_id,omitempty"`
+		ClientID     string `json:"client_id,omitempty"` // email for users, some UUID for API clients
 		ClientSecret string `json:"client_secret,omitempty"`
 		Token        string `json:"token,omitempty"`
+		Status       State  `json:"status,omitempty"`  // -2 = state_init, -1 = state_invalid, 0 = logged_out, 1 = logged_in
 		Expires      int64  `json:"expires,omitempty"` // 0 = never, > 0 = unix timestamp, < 0 = invalid
 	}
 )
